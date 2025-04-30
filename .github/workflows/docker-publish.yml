@@ -31,8 +31,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Get current date and time
-        run: echo "DATE_TAG=$(date +'%Y-%m-%d--%I-%M%p')" >> $GITHUB_ENV
+      - name: Get current date and time (Egypt time)
+        run: echo "DATE_TAG=$(TZ='Africa/Cairo' date +'%Y-%m-%d--%I-%M%p')" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: |
