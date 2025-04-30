@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build-and-push:
@@ -19,15 +20,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Get current date
-        id: date
-        run: echo "DATE_TAG=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+      - name: Get current date and time
+        run: echo "DATE_TAG=$(date +'%Y-%m-%d--%I-%M%p')" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: |
-          docker build -t elsman2020/node-hello:latest -t elsman2020/node-hello:${DATE_TAG} .
+          docker build -t elsman2020/node-hello:latest -t elsman2020/node-hello:${{ env.DATE_TAG }} .
 
       - name: Push Docker images
         run: |
           docker push elsman2020/node-hello:latest
-          docker push elsman2020/node-hello:${DATE_TAG}
+          docker push elsman2020/node-hello:${{ env.DATE_TAG }}
