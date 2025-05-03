@@ -123,6 +123,6 @@ Your Node.js app is now running on EKS and optionally monitored via New Relic.
 To destroy the infrastructure:
 
 ```bash
-cd terraform/
+cd ../terraform/
 terraform destroy
 ```
