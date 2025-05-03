@@ -17,14 +17,6 @@ spec:
         image: elsman2020/node-hello:latest
         ports:
         - containerPort: 3000
-        env:
-        - name: NEW_RELIC_LICENSE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: newrelic-license-key
-              key: licenseKey
-        - name: NEW_RELIC_APP_NAME
-          value: "helloworld-app"
         resources:
           requests:
             memory: "128Mi"

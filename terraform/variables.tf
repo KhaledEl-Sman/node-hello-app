@@ -24,8 +24,6 @@ variable "node_instance_types" {
   default = ["t3.small"]
 }
 
-variable "newrelic_license_key" {
-  description = "New Relic license key"
-  type        = string
-  sensitive   = true
+variable "profile" {
+  default = "eks-terraform"
 }

@@ -67,75 +67,49 @@ resource "aws_security_group" "web_sg" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.31"
-    
+  version = "20.36.0"
+
   cluster_name                    = var.cluster_name
-  cluster_version                 = "1.31"
   cluster_endpoint_public_access = true
-    
-  vpc_id                     = aws_vpc.main.id
-  subnet_ids                = aws_subnet.subnets[*].id
-  control_plane_subnet_ids  = aws_subnet.subnets[*].id
-    
+
+  cluster_addons = {
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+  }
+
+  vpc_id                   = aws_vpc.main.id
+  subnet_ids               = aws_subnet.subnets[*].id
+  control_plane_subnet_ids = aws_subnet.subnets[*].id
+
+  access_entries = {
+    s8r-admin-access = {
+      principal_arn = "arn:aws:iam::022203357448:user/S8R"
+      username      = "root-admin"
+      policy_associations = {
+        admin-access = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
+
   eks_managed_node_groups = {
     green = {
-    vpc_security_group_ids = [aws_security_group.web_sg.id]
-    min_size       = 2
-    max_size       = 3
-    desired_size   = 2
-    instance_types = var.node_instance_types
-    update_config = {
-        max_unavailable = 1
-    }
-
-    bootstrap_extra_args = "--use-max-pods false"
-    pre_bootstrap_user_data = <<-EOT
-        #!/bin/bash
-        echo "--max-pods=50" >> /etc/eks/bootstrap.sh
-    EOT
+      vpc_security_group_ids = [aws_security_group.web_sg.id]
+      min_size               = 2
+      max_size               = 3
+      desired_size           = 2
+      instance_types         = var.node_instance_types
     }
   }
-
-  tags = {
-    Environment = "hello-node"
-    Terraform   = "true"
-  }
-}
-
-resource "kubernetes_secret_v1" "newrelic_license" {
-  metadata {
-    name = "newrelic-license-key"
-    namespace = "newrelic"
-  }
-
-  data = {
-    licenseKey = var.newrelic_license_key
-  }
-
-  depends_on = [module.eks]
-}
-
-resource "helm_release" "newrelic" {
-  name       = "newrelic"
-  repository = "https://helm-charts.newrelic.com"
-  chart      = "nri-bundle"
-  namespace  = "newrelic"
-  create_namespace = true
-
-  set {
-    name  = "global.cluster"
-    value = var.cluster_name
-  }
-
-  set {
-    name  = "global.licenseKeySecret.name"
-    value = kubernetes_secret_v1.newrelic_license.metadata[0].name
-  }
-
-  set {
-    name  = "global.licenseKeySecret.key"
-    value = "licenseKey"
-  }
-
-  depends_on = [kubernetes_secret_v1.newrelic_license]
 }
