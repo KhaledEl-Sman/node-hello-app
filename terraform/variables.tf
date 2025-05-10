@@ -27,3 +27,7 @@ variable "node_instance_types" {
 variable "profile" {
   default = "eks-terraform"
 }
+
+variable "principal_arn" {
+  default = "arn:aws:iam::<acountId>:user/<userName>"
+}
