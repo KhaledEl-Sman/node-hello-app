@@ -90,7 +90,7 @@ module "eks" {
 
   access_entries = {
     s8r-admin-access = {
-      principal_arn = "arn:aws:iam::022203357448:user/S8R"
+      principal_arn = var.principal_arn
       username      = "root-admin"
       policy_associations = {
         admin-access = {
